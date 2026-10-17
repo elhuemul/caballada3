@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!--
+      ========================================================================
+      Caballada 3 - VBv
+      ------------------------------------------------------------------------
+      Desarrollado usando Gemini, por mí.
+      Basado en el juego original de Leo Quiroga en 1990
+      y su versión para Windows hecha por mí en 2003.
+      ========================================================================
+    -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Caballada 3 - VBv</title>
+    <style>
+        /* Modern reset & MS Sans Serif / System UI simulation */
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+        }
+
+        body {
+            background-color: #3A6EA5; /* Classic Windows Desktop Blue background */
+            font-family: "Segoe UI", "Tahoma", "MS Sans Serif", sans-serif;
+            margin: 0;
+            padding: 10px;
+            display: flex;
+            display: -webkit-flex;
+            justify-content: center;
+            -webkit-justify-content: center;
+            align-items: center;
+            -webkit-align-items: center;
+            min-height: 100vh;
+            min-height: -webkit-fill-available;
+            overflow: hidden;
+        }
+
+        /* Windows XP Form Outer Shell */
+        .vb-form {
+            background-color: #ECE9D8; /* XP System Window Background */
+            width: 850px;
+            max-width: 98vw;
+            height: 550px;
+            max-height: 98vh;
+            border: 3px solid #0055EA; /* XP Blue Border */
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+            -webkit-box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+            position: relative;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Windows XP Title Bar (Luna Theme) */
+        .vb-titlebar {
+            background: linear-gradient(to bottom, #0058EE 0%, #3880F7 12%, #0053E5 40%, #0040CD 100%);
+            background: -webkit-linear-gradient(top, #0058EE 0%, #3880F7 12%, #0053E5 40%, #0040CD 100%);
+            color: #FFFFFF;
+            padding: 3px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            display: flex;
+            display: -webkit-flex;
+            justify-content: space-between;
+            -webkit-justify-content: space-between;
+            align-items: center;
+            -webkit-align-items: center;
+            height: 30px;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.7);
+            border-bottom: 1px solid #002288;
+        }
+
+        .vb-titlebar-buttons {
+            display: flex;
+            display: -webkit-flex;
+            gap: 3px;
+        }
+
+        .vb-btn-window {
+            background: linear-gradient(to bottom, #FFFFFF, #ECE9D8);
+            background: -webkit-linear-gradient(top, #FFFFFF, #ECE9D8);
+            color: #000000;
+            border: 1px solid #002C9A;
+            border-radius: 3px;
+            width: 21px;
+            height: 21px;
+            font-size: 11px;
+            line-height: 18px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            display: -webkit-flex;
+            align-items: center;
+            -webkit-align-items: center;
+            justify-content: center;
+            -webkit-justify-content: center;
+            box-shadow: inset 0 1px 0 #FFF;
+            -webkit-box-shadow: inset 0 1px 0 #FFF;
+        }
+
+        .vb-btn-window:hover {
+            background: #FFE8A0;
+        }
+
+        .vb-btn-close {
+            background: linear-gradient(to bottom, #ECA89D, #C7503E) !important;
+            background: -webkit-linear-gradient(top, #ECA89D, #C7503E) !important;
+            color: #FFFFFF !important;
+            border: 1px solid #821D10 !important;
+            text-shadow: 0 1px 1px #000;
+        }
+
+        .vb-btn-close:hover {
+            background: linear-gradient(to bottom, #F5B9B0, #E0432E) !important;
+            background: -webkit-linear-gradient(top, #F5B9B0, #E0432E) !important;
+        }
+
+        .vb-content {
+            padding: 12px;
+            flex: 1;
+            -webkit-flex: 1;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+            justify-content: space-between;
+            -webkit-justify-content: space-between;
+            position: relative;
+        }
+
+        /* Racetrack Container */
+        .pista {
+            background-color: #D4EDDA; /* Light green track background */
+            border: 2px solid #7F9DB9; /* XP Inset Border */
+            border-radius: 3px;
+            height: 360px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+        }
+
+        .carril {
+            border-bottom: 1px dashed #A0A0A0;
+            flex: 1;
+            -webkit-flex: 1;
+            position: relative;
+            display: flex;
+            display: -webkit-flex;
+            align-items: center;
+            -webkit-align-items: center;
+            padding-left: 5px;
+        }
+
+        .carril:last-child {
+            border-bottom: none;
+        }
+
+        /* Position Badge on Racetrack */
+        .posicion-badge {
+            position: absolute;
+            right: 170px; /* Positioned left to avoid overlapping horses */
+            top: 50%;
+            transform: translateY(-50%);
+            -webkit-transform: translateY(-50%);
+            font-size: 15px;
+            font-weight: bold;
+            padding: 4px 10px;
+            border-radius: 12px;
+            border: 1px solid #000;
+            color: #FFF;
+            box-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+            -webkit-box-shadow: 1px 1px 4px rgba(0,0,0,0.3);
+            z-index: 10;
+            display: none;
+        }
+
+        .pos-1 { background-color: #FFD700; color: #000; border-color: #B8860B; } /* Gold */
+        .pos-2 { background-color: #C0C0C0; color: #000; border-color: #808080; } /* Silver */
+        .pos-3 { background-color: #CD7F32; color: #FFF; border-color: #8B4513; } /* Bronze */
+        .pos-4 { background-color: #6c757d; color: #FFF; border-color: #343a40; } /* 4th Place */
+
+        .carril-tag {
+            position: absolute;
+            top: 3px;
+            left: 6px;
+            font-size: 12px;
+            color: #000080;
+            font-weight: bold;
+            z-index: 2;
+            background: rgba(255, 255, 255, 0.92);
+            padding: 2px 7px;
+            border-radius: 3px;
+            border: 1px solid #7F9DB9;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+            -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.1);
+        }
+
+        /* Bet indicator tag on the racetrack lane */
+        .carril-apuesta-tag {
+            position: absolute;
+            top: 3px;
+            left: 175px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #856404;
+            background-color: rgba(255, 243, 205, 0.85);
+            border: 1px solid rgba(255, 238, 186, 0.9);
+            padding: 2px 8px;
+            border-radius: 10px;
+            z-index: 2;
+            display: none;
+            align-items: center;
+            -webkit-align-items: center;
+            gap: 4px;
+            box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+            -webkit-box-shadow: 1px 1px 3px rgba(0,0,0,0.15);
+            backdrop-filter: blur(1px);
+            -webkit-backdrop-filter: blur(1px);
+        }
+
+        .meta-linea {
+            position: absolute;
+            right: 70px;
+            top: 0;
+            bottom: 0;
+            width: 20px;
+            display: flex;
+            display: -webkit-flex;
+            border-left: 1px solid #000000;
+            border-right: 1px solid #000000;
+            box-sizing: border-box;
+            z-index: 2;
+        }
+
+        .meta-linea::before,
+        .meta-linea::after {
+            content: "";
+            flex: 1;
+            -webkit-flex: 1;
+            height: 100%;
+        }
+
+        .meta-linea::before {
+            background: repeating-linear-gradient(
+                0deg,
+                #000000 0px,
+                #000000 10px,
+                #FFFFFF 10px,
+                #FFFFFF 20px
+            );
+            background: -webkit-repeating-linear-gradient(
+                90deg,
+                #000000 0px,
+                #000000 10px,
+                #FFFFFF 10px,
+                #FFFFFF 20px
+            );
+        }
+
+        .meta-linea::after {
+            background: repeating-linear-gradient(
+                0deg,
+                #FFFFFF 0px,
+                #FFFFFF 10px,
+                #000000 10px,
+                #000000 20px
+            );
+            background: -webkit-repeating-linear-gradient(
+                90deg,
+                #FFFFFF 0px,
+                #FFFFFF 10px,
+                #000000 10px,
+                #000000 20px
+            );
+            border-left: 1px solid #000000;
+        }
+
+        /* Horse Container Animation */
+        .caballo-container {
+            position: absolute;
+            left: 10px;
+            display: flex;
+            display: -webkit-flex;
+            align-items: center;
+            -webkit-align-items: center;
+            z-index: 10;
+            top: 50%;
+            transform: translateY(-50%);
+            -webkit-transform: translateY(-50%);
+            will-change: left;
+        }
+
+        .dorsal {
+            background-color: #FFFFFF !important;
+            color: #000000 !important;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 1px 5px;
+            border-radius: 3px;
+            margin-right: 6px;
+            box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+            -webkit-box-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+            border: 1px solid #000;
+        }
+
+        .horse-svg {
+            width: 65px;
+            height: 48px;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+            -webkit-filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3));
+            transition: transform 0.05s ease-in-out;
+            -webkit-transition: -webkit-transform 0.05s ease-in-out;
+        }
+
+        /* Running animation toggling */
+        .running .leg-front {
+            animation: moveLegFront 0.25s infinite alternate ease-in-out;
+            -webkit-animation: moveLegFront 0.25s infinite alternate ease-in-out;
+        }
+        .running .leg-back {
+            animation: moveLegBack 0.25s infinite alternate ease-in-out;
+            -webkit-animation: moveLegBack 0.25s infinite alternate ease-in-out;
+        }
+
+        @keyframes moveLegFront {
+            0% { transform: rotate(-15deg); transform-origin: 50px 30px; }
+            100% { transform: rotate(15deg); transform-origin: 50px 30px; }
+        }
+
+        @-webkit-keyframes moveLegFront {
+            0% { -webkit-transform: rotate(-15deg); -webkit-transform-origin: 50px 30px; }
+            100% { -webkit-transform: rotate(15deg); -webkit-transform-origin: 50px 30px; }
+        }
+
+        @keyframes moveLegBack {
+            0% { transform: rotate(15deg); transform-origin: 25px 30px; }
+            100% { transform: rotate(-15deg); transform-origin: 25px 30px; }
+        }
+
+        @-webkit-keyframes moveLegBack {
+            0% { -webkit-transform: rotate(15deg); -webkit-transform-origin: 25px 30px; }
+            100% { -webkit-transform: rotate(-15deg); -webkit-transform-origin: 25px 30px; }
+        }
+
+        .horse-1 { 
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3)); 
+            -webkit-filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3)); 
+        }
+        .horse-2 { 
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3)) hue-rotate(210deg) saturate(2); 
+            -webkit-filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3)) hue-rotate(210deg) saturate(2); 
+        }
+        .horse-3 { 
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3)) hue-rotate(95deg) saturate(2); 
+            -webkit-filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.3)) hue-rotate(95deg) saturate(2); 
+        }
+        
+        /* Horse 4 Custom Brown Palette */
+        .horse-4 .leg-back { fill: #4A2306 !important; }
+        .horse-4 .leg-front { fill: #6B340B !important; }
+        .horse-4 .horse-body { fill: #7A3B0E !important; }
+        .horse-4 .horse-head { fill: #7A3B0E !important; }
+        .horse-4 .horse-tail { fill: #321602 !important; }
+        .horse-4 .horse-snout { fill: #321602 !important; }
+        .horse-4 .horse-mane { fill: #240F01 !important; }
+
+        /* Windows XP GroupBox / Frame Control */
+        .vb-frame {
+            border: 1px solid #D1D7DC;
+            border-radius: 5px;
+            padding: 12px 14px 10px 14px;
+            position: relative;
+            background-color: #ECE9D8;
+            margin-top: 8px;
+            box-shadow: inset 1px 1px 0 #FFF;
+            -webkit-box-shadow: inset 1px 1px 0 #FFF;
+        }
+
+        .vb-frame-title {
+            position: absolute;
+            top: -9px;
+            left: 12px;
+            background-color: #ECE9D8;
+            padding: 0 5px;
+            font-size: 11px;
+            color: #00156E;
+            font-weight: bold;
+        }
+
+        .panel-dashboard {
+            display: flex;
+            display: -webkit-flex;
+            justify-content: space-between;
+            -webkit-justify-content: space-between;
+            align-items: center;
+            -webkit-align-items: center;
+            gap: 10px;
+        }
+
+        .stat-box {
+            display: flex;
+            display: -webkit-flex;
+            align-items: center;
+            -webkit-align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #000080;
+            background: #FFFFFF;
+            padding: 5px 10px;
+            border: 1px solid #7F9DB9;
+            border-radius: 3px;
+        }
+
+        .relator-box {
+            display: flex;
+            display: -webkit-flex;
+            align-items: center;
+            -webkit-align-items: center;
+            gap: 10px;
+            background: #202428;
+            color: #33FF33;
+            font-family: "Consolas", "Courier New", monospace;
+            font-size: 13px;
+            font-weight: bold;
+            padding: 7px 12px;
+            border: 1px solid #000000;
+            border-radius: 3px;
+            box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8);
+            -webkit-box-shadow: inset 1px 1px 3px rgba(0,0,0,0.8);
+            min-height: 36px;
+            overflow: hidden;
+        }
+
+        .relator-icon {
+            font-size: 16px;
+            animation: pulseMic 1s infinite alternate;
+            -webkit-animation: pulseMic 1s infinite alternate;
+        }
+
+        @keyframes pulseMic {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
+
+        @-webkit-keyframes pulseMic {
+            from { opacity: 0.6; }
+            to { opacity: 1; }
+        }
+
+        .relator-texto {
+            flex: 1;
+            -webkit-flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .modal-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.35);
+            z-index: 150;
+            display: none;
+            justify-content: center;
+            -webkit-justify-content: center;
+            align-items: center;
+            -webkit-align-items: center;
+        }
+
+        .bet-window {
+            background-color: #ECE9D8;
+            width: 360px;
+            border: 3px solid #0055EA;
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+            -webkit-box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+            overflow: hidden;
+            margin: auto;
+        }
+
+        .bet-body {
+            padding: 16px;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+            gap: 12px;
+        }
+
+        .bet-row {
+            display: flex;
+            display: -webkit-flex;
+            justify-content: space-between;
+            -webkit-justify-content: space-between;
+            align-items: center;
+            -webkit-align-items: center;
+            font-size: 12px;
+        }
+
+        .vb-button {
+            background: linear-gradient(to bottom, #FFFFFF 0%, #ECE9D8 80%, #E3DFCE 100%);
+            background: -webkit-linear-gradient(top, #FFFFFF 0%, #ECE9D8 80%, #E3DFCE 100%);
+            border: 1px solid #003C74;
+            border-radius: 3px;
+            padding: 4px 16px;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            color: #000000;
+            outline: none;
+            min-width: 95px;
+            text-align: center;
+            box-shadow: inset 0 1px 0 #FFFFFF;
+            -webkit-box-shadow: inset 0 1px 0 #FFFFFF;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .vb-button:hover:not(:disabled) {
+            border-color: #E59700;
+            background: linear-gradient(to bottom, #FFFBF0 0%, #FCEB9C 80%, #F5DB74 100%);
+            background: -webkit-linear-gradient(top, #FFFBF0 0%, #FCEB9C 80%, #F5DB74 100%);
+        }
+
+        .vb-button:active:not(:disabled) {
+            background: linear-gradient(to bottom, #CDD3E2, #ECE9D8);
+            background: -webkit-linear-gradient(top, #CDD3E2, #ECE9D8);
+            border-color: #002C9A;
+            box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+            -webkit-box-shadow: inset 0 1px 2px rgba(0,0,0,0.2);
+        }
+
+        .vb-button:disabled {
+            color: #ACA899;
+            border-color: #C5C2B8;
+            background: #ECE9D8;
+            box-shadow: none;
+            -webkit-box-shadow: none;
+            cursor: default;
+        }
+
+        .vb-input, .vb-select {
+            border: 1px solid #7F9DB9;
+            border-radius: 2px;
+            background-color: #FFFFFF;
+            padding: 3px 6px;
+            font-family: inherit;
+            font-size: 12px;
+            outline: none;
+            color: #000000;
+            -webkit-appearance: none;
+            -moz-appearance: textfield;
+        }
+
+        .vb-input::-webkit-outer-spin-button,
+        .vb-input::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        .vb-input:focus, .vb-select:focus {
+            border-color: #FF9900;
+        }
+
+        #splash-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #ECE9D8;
+            z-index: 100;
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+            justify-content: space-between;
+            -webkit-justify-content: space-between;
+            align-items: center;
+            -webkit-align-items: center;
+            padding: 40px 20px;
+            border: 3px solid #0055EA;
+        }
+
+        .splash-header {
+            text-align: center;
+        }
+
+        .splash-title {
+            font-size: 32px;
+            font-weight: bold;
+            color: #003399;
+            margin: 0 0 10px 0;
+            letter-spacing: 1px;
+        }
+
+        .splash-subtitle {
+            font-size: 13px;
+            color: #404040;
+            margin: 0;
+        }
+
+        .splash-track {
+            width: 100%;
+            height: 80px;
+            position: relative;
+            overflow: hidden;
+            background-color: #D4EDDA;
+            border: 2px solid #7F9DB9;
+            border-radius: 3px;
+        }
+
+        #splash-horse {
+            position: absolute;
+            bottom: 5px;
+            left: -80px;
+            z-index: 10;
+            will-change: left;
+        }
+
+        .cuenta-regresiva {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            -webkit-transform: translate(-50%, -50%);
+            font-size: 54px;
+            font-weight: bold;
+            color: #000000;
+            text-shadow: 2px 2px 0 #FFFFFF, -2px -2px 0 #FFFFFF, 2px -2px 0 #FFFFFF, -2px 2px 0 #FFFFFF;
+            z-index: 50;
+            display: none;
+            pointer-events: none;
+            text-align: center;
+            width: 100%;
+            line-height: 1;
+        }
+
+        .msgbox-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.25);
+            z-index: 200;
+            display: none;
+            justify-content: center;
+            -webkit-justify-content: center;
+            align-items: center;
+            -webkit-align-items: center;
+        }
+
+        .msgbox-window {
+            background-color: #ECE9D8;
+            width: 370px;
+            border: 3px solid #0055EA;
+            border-top-left-radius: 6px;
+            border-top-right-radius: 6px;
+            box-shadow: 4px 4px 15px rgba(0,0,0,0.4);
+            -webkit-box-shadow: 4px 4px 15px rgba(0,0,0,0.4);
+            display: flex;
+            display: -webkit-flex;
+            flex-direction: column;
+            -webkit-flex-direction: column;
+            overflow: hidden;
+            margin: auto;
+        }
+
+        .msgbox-titlebar {
+            background: linear-gradient(to bottom, #0058EE 0%, #3880F7 12%, #0053E5 40%, #0040CD 100%);
+            background: -webkit-linear-gradient(top, #0058EE 0%, #3880F7 12%, #0053E5 40%, #0040CD 100%);
+            color: #FFFFFF;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            text-shadow: 1px 1px 1px rgba(0,0,0,0.7);
+        }
+
+        .msgbox-body {
+            padding: 18px 15px;
+            display: flex;
+            display: -webkit-flex;
+            align-items: center;
+            -webkit-align-items: center;
+            gap: 15px;
+            font-size: 12px;
+            color: #000;
+        }
+
+        .msgbox-icon {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+            -webkit-flex-shrink: 0;
+        }
+
+        .msgbox-footer {
+            padding: 0 15px 12px 15px;
+            display: flex;
+            display: -webkit-flex;
+            justify-content: center;
+            -webkit-justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="vb-form">
+        <!-- 1. SPLASH SCREEN -->
+        <div id="splash-screen">
+            <div class="splash-header">
+                <h1 class="splash-title">Caballada 3 - VBv</h1>
+                <p class="splash-subtitle">Est. 1990</p>
+            </div>
+
+            <div class="splash-track">
+                <div class="meta-linea" style="z-index: 1;"></div>
+                <div id="splash-horse" class="running">
+                    <svg class="horse-svg" viewBox="0 0 100 60">
+                        <g>
+                            <path fill="#B8860B" d="M 12 25 C 5 28, 2 38, 5 45 C 8 42, 10 32, 16 28 Z"/>
+                            <path class="leg-back" fill="#DAA520" d="M 22 35 L 12 55 L 17 56 L 27 38 Z M 30 35 L 38 54 L 33 55 L 25 37 Z"/>
+                            <ellipse cx="40" cy="30" rx="22" ry="12" fill="#FFD700"/>
+                            <path fill="#FFD700" d="M 48 24 C 55 18, 62 10, 68 8 C 72 14, 68 22, 58 28 Z"/>
+                            <path fill="#FFD700" d="M 64 8 C 70 4, 78 5, 82 10 C 84 14, 80 18, 72 18 C 66 18, 62 12, 64 8 Z"/>
+                            <ellipse cx="80" cy="13" rx="4" ry="3" fill="#D4A000"/>
+                            <circle cx="74" cy="9" r="1.5" fill="#000"/>
+                            <path fill="#B8860B" d="M 52 20 C 56 14, 64 6, 66 6 C 63 10, 58 16, 54 22 Z"/>
+                            <path class="leg-front" fill="#FFD700" d="M 50 35 L 62 53 L 57 55 L 44 37 Z M 56 34 L 46 54 L 51 55 L 61 36 Z"/>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <button class="vb-button" style="padding: 6px 24px;" onclick="cerrarSplash()">Iniciar Juego</button>
+        </div>
+
+        <!-- 2. MAIN FORM (frmPrincipal) -->
+        <div class="vb-titlebar">
+            <span>Caballada 3 - VBv</span>
+            <div class="vb-titlebar-buttons">
+                <div class="vb-btn-window">_</div>
+                <div class="vb-btn-window">□</div>
+                <div class="vb-btn-window vb-btn-close">X</div>
+            </div>
+        </div>
+
+        <div class="vb-content">
+            <!-- Racetrack -->
+            <div class="pista">
+                <div id="lblCuenta" class="cuenta-regresiva">3</div>
+                <div class="meta-linea"></div>
+
+                <!-- Lane 1: Jolly Jumper -->
+                <div class="carril">
+                    <span class="carril-tag">Jolly Jumper</span>
+                    <span id="lane-bet-0" class="carril-apuesta-tag">🪙 <span id="lane-bet-val-0"></span></span>
+                    <span id="pos-badge-0" class="posicion-badge"></span>
+                    <div id="c0" class="caballo-container">
+                        <span class="dorsal">1</span>
+                        <svg class="horse-svg" viewBox="0 0 100 60">
+                            <g>
+                                <path fill="#B8860B" d="M 12 25 C 5 28, 2 38, 5 45 C 8 42, 10 32, 16 28 Z"/>
+                                <path class="leg-back" fill="#DAA520" d="M 22 35 L 12 55 L 17 56 L 27 38 Z M 30 35 L 38 54 L 33 55 L 25 37 Z"/>
+                                <ellipse cx="40" cy="30" rx="22" ry="12" fill="#FFD700"/>
+                                <path fill="#FFD700" d="M 48 24 C 55 18, 62 10, 68 8 C 72 14, 68 22, 58 28 Z"/>
+                                <path fill="#FFD700" d="M 64 8 C 70 4, 78 5, 82 10 C 84 14, 80 18, 72 18 C 66 18, 62 12, 64 8 Z"/>
+                                <ellipse cx="80" cy="13" rx="4" ry="3" fill="#D4A000"/>
+                                <circle cx="74" cy="9" r="1.5" fill="#000"/>
+                                <path fill="#B8860B" d="M 52 20 C 56 14, 64 6, 66 6 C 63 10, 58 16, 54 22 Z"/>
+                                <path class="leg-front" fill="#FFD700" d="M 50 35 L 62 53 L 57 55 L 44 37 Z M 56 34 L 46 54 L 51 55 L 61 36 Z"/>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Lane 2: Caballo de Tergopol -->
+                <div class="carril">
+                    <span class="carril-tag">Caballo de Tergopol</span>
+                    <span id="lane-bet-1" class="carril-apuesta-tag">🪙 <span id="lane-bet-val-1"></span></span>
+                    <span id="pos-badge-1" class="posicion-badge"></span>
+                    <div id="c1" class="caballo-container">
+                        <span class="dorsal">2</span>
+                        <svg class="horse-svg horse-2" viewBox="0 0 100 60">
+                            <g>
+                                <path fill="#5A2A0C" d="M 12 25 C 5 28, 2 38, 5 45 C 8 42, 10 32, 16 28 Z"/>
+                                <path class="leg-back" fill="#7A3A12" d="M 22 35 L 12 55 L 17 56 L 27 38 Z M 30 35 L 38 54 L 33 55 L 25 37 Z"/>
+                                <ellipse cx="40" cy="30" rx="22" ry="12" fill="#964B00"/>
+                                <path fill="#964B00" d="M 48 24 C 55 18, 62 10, 68 8 C 72 14, 68 22, 58 28 Z"/>
+                                <path fill="#964B00" d="M 64 8 C 70 4, 78 5, 82 10 C 84 14, 80 18, 72 18 C 66 18, 62 12, 64 8 Z"/>
+                                <ellipse cx="80" cy="13" rx="4" ry="3" fill="#5A2A0C"/>
+                                <circle cx="74" cy="9" r="1.5" fill="#000"/>
+                                <path fill="#3D1E08" d="M 52 20 C 56 14, 64 6, 66 6 C 63 10, 58 16, 54 22 Z"/>
+                                <path class="leg-front" fill="#964B00" d="M 50 35 L 62 53 L 57 55 L 44 37 Z M 56 34 L 46 54 L 51 55 L 61 36 Z"/>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Lane 3: Sakula di Kerada -->
+                <div class="carril">
+                    <span class="carril-tag">Sakula di Kerada</span>
+                    <span id="lane-bet-2" class="carril-apuesta-tag">🪙 <span id="lane-bet-val-2"></span></span>
+                    <span id="pos-badge-2" class="posicion-badge"></span>
+                    <div id="c2" class="caballo-container">
+                        <span class="dorsal">3</span>
+                        <svg class="horse-svg horse-3" viewBox="0 0 100 60">
+                            <g>
+                                <path class="horse-tail" fill="#5A2A0C" d="M 12 25 C 5 28, 2 38, 5 45 C 8 42, 10 32, 16 28 Z"/>
+                                <path class="leg-back" fill="#7A3A12" d="M 22 35 L 12 55 L 17 56 L 27 38 Z M 30 35 L 38 54 L 33 55 L 25 37 Z"/>
+                                <ellipse class="horse-body" cx="40" cy="30" rx="22" ry="12" fill="#964B00"/>
+                                <path class="horse-body" fill="#964B00" d="M 48 24 C 55 18, 62 10, 68 8 C 72 14, 68 22, 58 28 Z"/>
+                                <path class="horse-head" fill="#964B00" d="M 64 8 C 70 4, 78 5, 82 10 C 84 14, 80 18, 72 18 C 66 18, 62 12, 64 8 Z"/>
+                                <ellipse class="horse-snout" cx="80" cy="13" rx="4" ry="3" fill="#5A2A0C"/>
+                                <circle cx="74" cy="9" r="1.5" fill="#000"/>
+                                <path class="horse-mane" fill="#3D1E08" d="M 52 20 C 56 14, 64 6, 66 6 C 63 10, 58 16, 54 22 Z"/>
+                                <path class="leg-front" fill="#964B00" d="M 50 35 L 62 53 L 57 55 L 44 37 Z M 56 34 L 46 54 L 51 55 L 61 36 Z"/>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Lane 4: Caballo Loco -->
+                <div class="carril">
+                    <span class="carril-tag">Caballo Loco</span>
+                    <span id="lane-bet-3" class="carril-apuesta-tag">🪙 <span id="lane-bet-val-3"></span></span>
+                    <span id="pos-badge-3" class="posicion-badge"></span>
+                    <div id="c3" class="caballo-container">
+                        <span class="dorsal">4</span>
+                        <svg class="horse-svg horse-4" viewBox="0 0 100 60">
+                            <g>
+                                <path class="horse-tail" fill="#5A2A0C" d="M 12 25 C 5 28, 2 38, 5 45 C 8 42, 10 32, 16 28 Z"/>
+                                <path class="leg-back" fill="#7A3A12" d="M 22 35 L 12 55 L 17 56 L 27 38 Z M 30 35 L 38 54 L 33 55 L 25 37 Z"/>
+                                <ellipse class="horse-body" cx="40" cy="30" rx="22" ry="12" fill="#964B00"/>
+                                <path class="horse-body" fill="#964B00" d="M 48 24 C 55 18, 62 10, 68 8 C 72 14, 68 22, 58 28 Z"/>
+                                <path class="horse-head" fill="#964B00" d="M 64 8 C 70 4, 78 5, 82 10 C 84 14, 80 18, 72 18 C 66 18, 62 12, 64 8 Z"/>
+                                <ellipse class="horse-snout" cx="80" cy="13" rx="4" ry="3" fill="#5A2A0C"/>
+                                <circle cx="74" cy="9" r="1.5" fill="#000"/>
+                                <path class="horse-mane" fill="#3D1E08" d="M 52 20 C 56 14, 64 6, 66 6 C 63 10, 58 16, 54 22 Z"/>
+                                <path class="leg-front" fill="#964B00" d="M 50 35 L 62 53 L 57 55 L 44 37 Z M 56 34 L 46 54 L 51 55 L 61 36 Z"/>
+                            </g>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Panel de Relator de la Carrera -->
+            <div class="vb-frame">
+                <span class="vb-frame-title">Relato de la Carrera</span>
+                <div class="relator-box">
+                    <span class="relator-icon">🎙️</span>
+                    <span id="lblRelator" class="relator-texto">Bienvenidos a Hipódromo Caballada 3. Realice su apuesta para comenzar...</span>
+                </div>
+            </div>
+
+            <!-- Panel de Información Principal -->
+            <div class="vb-frame">
+                <div class="panel-dashboard">
+                    <div class="stat-box">
+                        <span>💰 Monedas:</span>
+                        <span id="lblMonedas">1000</span>
+                    </div>
+
+                    <div class="stat-box">
+                        <span>🏁 Carreras Corridas:</span>
+                        <span id="lblCarreras">0</span>
+                    </div>
+
+                    <div class="stat-box">
+                        <span>🏆 Apuestas Ganadas:</span>
+                        <span id="lblGanadas">0</span>
+                    </div>
+
+                    <div>
+                        <button id="cmdAbrirApuesta" class="vb-button" style="padding: 6px 18px;" onclick="abrirModalApuesta()">Realizar Apuesta...</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 3. POPUP MODAL DE APUESTAS (Inside .vb-form) -->
+        <div id="modalApuestas" class="modal-backdrop">
+            <div class="bet-window">
+                <div class="vb-titlebar">
+                    <span>Realizar Apuesta</span>
+                    <div class="vb-titlebar-buttons">
+                        <div class="vb-btn-window vb-btn-close" onclick="cerrarModalApuesta()">X</div>
+                    </div>
+                </div>
+                <div class="bet-body">
+                    <div class="bet-row" style="align-items: flex-start; flex-direction: column; gap: 8px;">
+                        <label><b>Seleccionar Caballo:</b></label>
+                        <div style="display: flex; width: 100%; align-items: center; justify-content: space-between;">
+                            <div style="display: flex; flex-direction: column; gap: 6px; padding-left: 4px;">
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #D4A000; font-weight: bold;">
+                                    <input type="radio" name="optCaballo" value="0" checked onchange="actualizarPrevisualizacionCaballo(0)"> #1 Jolly Jumper
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #0000CC; font-weight: bold;">
+                                    <input type="radio" name="optCaballo" value="1" onchange="actualizarPrevisualizacionCaballo(1)"> #2 Caballo de Tergopol
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #008800; font-weight: bold;">
+                                    <input type="radio" name="optCaballo" value="2" onchange="actualizarPrevisualizacionCaballo(2)"> #3 Sakula di Kerada
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; color: #8B4513; font-weight: bold;">
+                                    <input type="radio" name="optCaballo" value="3" onchange="actualizarPrevisualizacionCaballo(3)"> #4 Caballo Loco
+                                </label>
+                            </div>
+                            
+                            <!-- Horse Preview Container -->
+                            <div style="background: #FFFFFF; border: 1px solid #7F9DB9; border-radius: 4px; padding: 10px 14px; display: flex; align-items: center; justify-content: center; min-width: 100px; height: 75px; box-shadow: inset 1px 1px 2px rgba(0,0,0,0.1);">
+                                <div id="previewCaballoContainer" class="running" style="transform: scale(1.15);">
+                                    <svg id="previewHorseSvg" class="horse-svg" viewBox="0 0 100 60">
+                                        <g id="previewSvgContent">
+                                            <path fill="#B8860B" d="M 12 25 C 5 28, 2 38, 5 45 C 8 42, 10 32, 16 28 Z"/>
+                                            <path class="leg-back" fill="#DAA520" d="M 22 35 L 12 55 L 17 56 L 27 38 Z M 30 35 L 38 54 L 33 55 L 25 37 Z"/>
+                                            <ellipse cx="40" cy="30" rx="22" ry="12" fill="#FFD700"/>
+                                            <path fill="#FFD700" d="M 48 24 C 55 18, 62 10, 68 8 C 72 14, 68 22, 58 28 Z"/>
+                                            <path fill="#FFD700" d="M 64 8 C 70 4, 78 5, 82 10 C 84 14, 80 18, 72 18 C 66 18, 62 12, 64 8 Z"/>
+                                            <ellipse cx="80" cy="13" rx="4" ry="3" fill="#D4A000"/>
+                                            <circle cx="74" cy="9" r="1.5" fill="#000"/>
+                                            <path fill="#B8860B" d="M 52 20 C 56 14, 64 6, 66 6 C 63 10, 58 16, 54 22 Z"/>
+                                            <path class="leg-front" fill="#FFD700" d="M 50 35 L 62 53 L 57 55 L 44 37 Z M 56 34 L 46 54 L 51 55 L 61 36 Z"/>
+                                        </g>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bet-row">
+                        <label for="txtApuesta"><b>Monto Apuesta:</b></label>
+                        <div style="display: flex; gap: 6px; align-items: center;">
+                            <input type="number" id="txtApuesta" class="vb-input" value="0" min="10" style="width: 90px;">
+                            <button class="vb-button" style="min-width: unset; padding: 3px 8px; font-size: 11px;" onclick="apostarTodo()">Apostar Todo</button>
+                        </div>
+                    </div>
+
+                    <div class="bet-row" style="background: #FFFBF0; padding: 6px; border: 1px solid #E59700; border-radius: 3px; font-size: 11px;">
+                        <span>Saldo disponible: <b id="lblSaldoModal">1000</b> monedas</span>
+                    </div>
+
+                    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px;">
+                        <button class="vb-button" onclick="cerrarModalApuesta()">Cancelar</button>
+                        <button id="cmdEmpezar" class="vb-button" onclick="confirmarEIniciarCarrera()">Apostar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom VB6 MsgBox Modal (Inside .vb-form) -->
+        <div id="msgbox" class="msgbox-backdrop">
+            <div class="msgbox-window">
+                <div id="msgbox-title" class="msgbox-titlebar">Resultado</div>
+                <div class="msgbox-body">
+                    <svg class="msgbox-icon" viewBox="0 0 32 32">
+                        <circle cx="16" cy="16" r="14" fill="#000080"/>
+                        <text x="16" y="23" fill="#FFF" font-size="20" font-weight="bold" text-anchor="middle">i</text>
+                    </svg>
+                    <div id="msgbox-text">Resultado de la carrera</div>
+                </div>
+                <div class="msgbox-footer">
+                    <button class="vb-button" onclick="cerrarMsgBox()">Aceptar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const nombresCaballos = [
+            "Jolly Jumper",
+            "Caballo de Tergopol",
+            "Sakula di Kerada",
+            "Caballo Loco"
+        ];
+
+        const coloresCaballos = [
+            "#D4A000",
+            "#0000CC",
+            "#008800",
+            "#8B4513"
+        ];
+
+        let monedas = 1000;
+        let carrerasCorridas = 0;
+        let apuestasGanadas = 0;
+        let segundosPuestos = 0;
+        let tercerosPuestos = 0;
+        let maxMonedasAlcanzadas = 1000;
+        let posiciones = [10, 10, 10, 10];
+        let splashLeft = -80;
+        let splashInterval = null;
+        let sinDinero = false;
+        let ultimoPuntero = -1;
+
+        window.onload = function() {
+            splashInterval = setInterval(() => {
+                splashLeft += 5;
+                const spCaballo = document.getElementById('splash-horse');
+                if (spCaballo) spCaballo.style.left = splashLeft + 'px';
+                if (splashLeft > 800) splashLeft = -80;
+            }, 30);
+            actualizarEstadisticas();
+        };
+
+        function actualizarEstadisticas() {
+            if (monedas > maxMonedasAlcanzadas) {
+                maxMonedasAlcanzadas = monedas;
+            }
+            document.getElementById('lblMonedas').innerText = monedas;
+            document.getElementById('lblCarreras').innerText = carrerasCorridas;
+            document.getElementById('lblGanadas').innerText = apuestasGanadas;
+            document.getElementById('lblSaldoModal').innerText = monedas;
+        }
+
+        function actualizarPrevisualizacionCaballo(idCaballo) {
+            const container = document.getElementById('previewCaballoContainer');
+            if (!container) return;
+
+            const trackHorse = document.querySelector('#c' + idCaballo + ' .horse-svg');
+            if (trackHorse) {
+                container.innerHTML = '';
+                const clonedSvg = trackHorse.cloneNode(true);
+                clonedSvg.id = 'previewHorseSvg';
+                container.appendChild(clonedSvg);
+            }
+        }
+
+        function abrirModalApuesta() {
+            document.getElementById('lblSaldoModal').innerText = monedas;
+            document.getElementById('txtApuesta').value = 0;
+            const caballoSelected = document.querySelector('input[name="optCaballo"]:checked');
+            const idx = caballoSelected ? parseInt(caballoSelected.value) : 0;
+            actualizarPrevisualizacionCaballo(idx);
+            document.getElementById('modalApuestas').style.display = 'flex';
+        }
+
+        function cerrarModalApuesta() {
+            document.getElementById('modalApuestas').style.display = 'none';
+        }
+
+        function apostarTodo() {
+            if (monedas > 0) {
+                document.getElementById('txtApuesta').value = monedas;
+            }
+        }
+
+        function cerrarSplash() {
+            if (splashInterval) clearInterval(splashInterval);
+            document.getElementById('splash-screen').style.display = 'none';
+        }
+
+        function resetearCaballos() {
+            posiciones = [10, 10, 10, 10];
+            ultimoPuntero = -1;
+            document.getElementById('lblRelator').innerText = "Caballos en la partida... ¡Esperando la señal de largada!";
+            for (let i = 0; i < 4; i++) {
+                const caballo = document.getElementById('c' + i);
+                if (caballo) {
+                    caballo.style.left = '10px';
+                    caballo.classList.remove('running');
+                }
+                const badge = document.getElementById('pos-badge-' + i);
+                if (badge) {
+                    badge.style.display = 'none';
+                    badge.className = 'posicion-badge';
+                    badge.innerText = '';
+                }
+                const laneBetTag = document.getElementById('lane-bet-' + i);
+                if (laneBetTag) {
+                    laneBetTag.style.display = 'none';
+                }
+            }
+        }
+        function mostrarMsgBox(mensaje, titulo = "Resultado") {
+            document.getElementById('msgbox-title').innerText = titulo;
+            document.getElementById('msgbox-text').innerHTML = mensaje.replace(/\n/g, '<br>');
+            document.getElementById('msgbox').style.display = 'flex';
+        }
+
+        function cerrarMsgBox() {
+            document.getElementById('msgbox').style.display = 'none';
+            resetearCaballos();
+
+            if (sinDinero) {
+                sinDinero = false;
+                const resumenStats = `<b>📊 RESUMEN DE TU TRAYECTORIA</b><br><br>` +
+                    `🏁 <b>Carreras Totales:</b> ${carrerasCorridas}<br>` +
+                    `💰 <b>Máximo de Monedas Alcanzado:</b> ${maxMonedasAlcanzadas}<br>` +
+                    `🏆 <b>1° Puestos (Ganadas):</b> ${apuestasGanadas}<br>` +
+                    `🥈 <b>2° Puestos:</b> ${segundosPuestos}<br>` +
+                    `🥉 <b>3° Puestos:</b> ${tercerosPuestos}<br><br>` +
+                    `<span style="color: #CC0000; font-weight: bold;">Se han acreditado 1000 monedas para reiniciar el juego.</span>`;
+
+                monedas = 1000;
+                maxMonedasAlcanzadas = 1000;
+                carrerasCorridas = 0;
+                apuestasGanadas = 0;
+                segundosPuestos = 0;
+                tercerosPuestos = 0;
+                actualizarEstadisticas();
+
+                setTimeout(() => {
+                    mostrarMsgBox("Ya no tienes monedas... sufriras la maldicion del Lenguado", "Fin del Juego");
+                    const btnAceptar = document.querySelector('#msgbox .msgbox-footer button');
+                    if (btnAceptar) {
+                        btnAceptar.onclick = function() {
+                            btnAceptar.onclick = cerrarMsgBox;
+                            mostrarMsgBox(resumenStats, "Fin del Juego");
+                        };
+                    }
+                }, 200);
+            }
+            document.getElementById('cmdAbrirApuesta').disabled = false;
+        }
+
+        function confirmarEIniciarCarrera() {
+            let apuesta = parseInt(document.getElementById('txtApuesta').value);
+
+            if (isNaN(apuesta) || apuesta <= 0) {
+                mostrarMsgBox("Ingrese un monto de apuesta válido.");
+                return;
+            }
+
+            if (apuesta > monedas) {
+                mostrarMsgBox("No posee suficientes monedas para esa apuesta.");
+                return;
+            }
+
+            const caballoSelected = document.querySelector('input[name="optCaballo"]:checked');
+            const caballoElegido = caballoSelected ? parseInt(caballoSelected.value) : 0;
+
+            cerrarModalApuesta();
+            document.getElementById('cmdAbrirApuesta').disabled = true;
+            resetearCaballos();
+
+            const laneBetTag = document.getElementById('lane-bet-' + caballoElegido);
+            const laneBetVal = document.getElementById('lane-bet-val-' + caballoElegido);
+            if (laneBetTag && laneBetVal) {
+                laneBetVal.innerText = apuesta;
+                laneBetTag.style.display = 'inline-flex';
+            }
+
+            const lbl = document.getElementById('lblCuenta');
+            lbl.style.display = 'block';
+            lbl.innerText = "3";
+            document.getElementById('lblRelator').innerText = "🎙️ ¡Atención! Los ejemplares están alineados...";
+
+            setTimeout(() => { 
+                lbl.innerText = "2"; 
+                document.getElementById('lblRelator').innerText = "🎙️ ¡Suena la campana en breve!";
+            }, 1000);
+            setTimeout(() => { 
+                lbl.innerText = "1"; 
+                document.getElementById('lblRelator').innerText = "🎙️ ¡Prepárense!...";
+            }, 2000);
+            setTimeout(() => { 
+                lbl.innerText = "¡LARGARON!"; 
+                document.getElementById('lblRelator').innerText = "🎙️ ¡¡¡LARGAAARON!!! ¡Abren las gateras y salen disparados!";
+            }, 3000);
+            setTimeout(() => {
+                lbl.style.display = 'none';
+                for (let i = 0; i < 4; i++) {
+                    document.getElementById('c' + i).classList.add('running');
+                }
+                ejecutarCarrera(apuesta);
+            }, 4000);
+        }
+
+        function ejecutarCarrera(apuesta) {
+            const caballoSelected = document.querySelector('input[name="optCaballo"]:checked');
+            const caballoElegido = caballoSelected ? parseInt(caballoSelected.value) : 0;
+            const ordenLlegada = [];
+            const metaPx = 710;
+
+            const comentariosLarga = [
+                "¡Salió como una tromba!",
+                "¡Toma rápida luz en el arranque!",
+                "¡Mete presión desde el inicio!",
+                "¡Pica en punta en los primeros metros!"
+            ];
+
+            const comentariosPelea = [
+                "¡Viene cabeza a cabeza en la delantera!",
+                "¡No se dan tregua por el primer lugar!",
+                "¡Ataca fuertemente por dentro!",
+                "¡Busca espacio por el lado exterior!",
+                "¡Sigue al frente manteniendo la luz de ventaja!"
+            ];
+
+            const comentariosFinal = [
+                "¡Últimos metros, entra a definir!",
+                "¡Abre el paso rumbeando a la meta!",
+                "¡Descuenta metros en un final electrizante!",
+                "¡Se perfila para cruzar el disco!"
+            ];
+
+            let contadorPasos = 0;
+
+            const timerCarrera = setInterval(() => {
+                contadorPasos++;
+                for (let i = 0; i < 4; i++) {
+                    if (posiciones[i] < metaPx) {
+                        let avance = (Math.floor(Math.random() * 10) + 1) * 0.253;
+                        posiciones[i] += avance;
+
+                        if (posiciones[i] >= metaPx) {
+                            posiciones[i] = metaPx;
+                            if (!ordenLlegada.includes(i)) {
+                                ordenLlegada.push(i);
+                                const posLlegada = ordenLlegada.length;
+                                const badge = document.getElementById('pos-badge-' + i);
+                                if (badge) {
+                                    badge.style.display = 'inline-block';
+                                    badge.className = 'posicion-badge pos-' + posLlegada;
+                                    badge.innerText = posLlegada + '° Lugar';
+                                }
+                            }
+                        }
+
+                        const elCaballo = document.getElementById('c' + i);
+                        if (elCaballo) {
+                            elCaballo.style.left = posiciones[i] + 'px';
+                        }
+                    }
+                }
+
+                let punteroActual = 0;
+                let maxPos = posiciones[0];
+                for (let k = 1; k < 4; k++) {
+                    if (posiciones[k] > maxPos) {
+                        maxPos = posiciones[k];
+                        punteroActual = k;
+                    }
+                }
+
+                if (contadorPasos % 28 === 0 && ordenLlegada.length === 0) {
+                    let frase = "";
+                    if (maxPos < 200) {
+                        let idx = Math.floor(Math.random() * comentariosLarga.length);
+                        frase = comentariosLarga[idx];
+                    } else if (maxPos < 500) {
+                        let idx = Math.floor(Math.random() * comentariosPelea.length);
+                        frase = comentariosPelea[idx];
+                    } else {
+                        let idx = Math.floor(Math.random() * comentariosFinal.length);
+                        frase = comentariosFinal[idx];
+                    }
+
+                    if (punteroActual !== ultimoPuntero || contadorPasos % 55 === 0) {
+                        document.getElementById('lblRelator').innerText = `🎙️ #${punteroActual + 1} ${nombresCaballos[punteroActual]}: ${frase}`;
+                        ultimoPuntero = punteroActual;
+                    }
+                }
+
+                if (ordenLlegada.length === 4) {
+                    clearInterval(timerCarrera);
+
+                    for (let i = 0; i < 4; i++) {
+                        const cEl = document.getElementById('c' + i);
+                        if (cEl) cEl.classList.remove('running');
+                    }
+
+                    carrerasCorridas++;
+
+                    const ganador = ordenLlegada[0];
+                    document.getElementById('lblRelator').innerText = `🏆 ¡CRUZARON EL DISCO! Ganador: #${ganador + 1} ${nombresCaballos[ganador]}!`;
+
+                    const formatCaballo = (idx) => `<b style="color: ${coloresCaballos[idx]};">#${idx + 1} ${nombresCaballos[idx]}</b>`;
+
+                    let mensajeResultados = `<b>Ganador de la carrera:</b> ${formatCaballo(ganador)}<br><br>`;
+                    mensajeResultados += `1°: ${formatCaballo(ordenLlegada[0])}<br>`;
+                    mensajeResultados += `2°: ${formatCaballo(ordenLlegada[1])}<br>`;
+                    mensajeResultados += `3°: ${formatCaballo(ordenLlegada[2])}<br>`;
+                    mensajeResultados += `4°: ${formatCaballo(ordenLlegada[3])}<br><br>`;
+
+                    if (caballoElegido === ganador) {
+                        const ganancia = apuesta * 2;
+                        monedas += ganancia;
+                        apuestasGanadas++;
+                        mensajeResultados += `<span style="color: green; font-weight: bold;">¡FELICIDADES! ¡1° LUGAR! Ganaste ${ganancia} monedas (200% de tu apuesta).</span>`;
+                    } else if (caballoElegido === ordenLlegada[1]) {
+                        const premio2do = Math.floor(apuesta * 1.5);
+                        const gananciaNeta = premio2do - apuesta;
+                        monedas += gananciaNeta;
+                        segundosPuestos++;
+                        mensajeResultados += `<span style="color: #0066CC; font-weight: bold;">¡2° LUGAR! Obtienes un premio del 150% (${premio2do} monedas, +${gananciaNeta} de ganancia neta).</span>`;
+                    } else if (caballoElegido === ordenLlegada[2]) {
+                        const recupero = Math.floor(apuesta * 0.5);
+                        monedas -= (apuesta - recupero);
+                        tercerosPuestos++;
+                        mensajeResultados += `<span style="color: #CC6600; font-weight: bold;">¡3° LUGAR! Recuperas el 50% de tu apuesta (${recupero} monedas).</span>`;
+                        if (monedas <= 0) {
+                            sinDinero = true;
+                        }
+                    } else {
+                        monedas -= apuesta;
+                        mensajeResultados += `<span style="color: red; font-weight: bold;">4° LUGAR: Perdiste tu apuesta de ${apuesta} monedas.</span>`;
+                        if (monedas <= 0) {
+                            sinDinero = true;
+                        }
+                    }
+
+                    actualizarEstadisticas();
+                    setTimeout(() => {
+                        mostrarMsgBox(mensajeResultados);
+                    }, 500);
+                }
+            }, 30);
+        }
+    </script>
+</body>
+</html>
